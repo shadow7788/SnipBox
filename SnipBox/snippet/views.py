@@ -24,6 +24,15 @@ class SnippetListView(APIView):
         return Response(snippet_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SnippetDetailView(APIView):
+    def get(self, request, id):
+        try:
+            snippet = Snippet.objects.get(id=id, user=request.user)
+            return Response(SnippetSerializer(snippet).data)
+        except ObjectDoesNotExist:
+            return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 def make_data(request):
     tags_data = request.data.pop("tags", [])
     snippet_data = request.data
