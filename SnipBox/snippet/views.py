@@ -70,6 +70,13 @@ class TagView(APIView):
         tag_list = Tag.objects.all()
         return Response(TagSerializer(tag_list, many=True).data)
 
+    def post(self, request):
+        try:
+            snippets = Snippet.objects.filter(tags__title__in=request.data["tags"], user=request.user, status=1)
+            return Response(SnippetSerializer(snippets, many=True).data)
+        except KeyError:
+            return Response({"message": "Tags required"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 def make_data(request):
     tags_data = request.data.pop("tags", [])
