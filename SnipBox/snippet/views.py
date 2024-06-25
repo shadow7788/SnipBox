@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from snippet.models import Tag, Snippet
-from snippet.serializers import SnippetSerializer
+from snippet.serializers import SnippetSerializer, SnippetListSerializer
 
 
 # Create your views here.
@@ -22,6 +22,15 @@ class SnippetListView(APIView):
             return Response(self.serializer_class(snippet).data, status=status.HTTP_201_CREATED)
 
         return Response(snippet_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        snippet_list = Snippet.objects.filter(user=request.user)
+        print(snippet_list)
+        data = SnippetListSerializer(snippet_list, context={'request': request}, many=True).data
+        return Response({
+            "count": len(data),
+            "data": data
+        })
 
 
 class SnippetDetailView(APIView):
