@@ -1,4 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -24,7 +26,7 @@ class SnippetListView(APIView):
         return Response(snippet_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        snippet_list = Snippet.objects.filter(user=request.user)
+        snippet_list = Snippet.objects.filter(user=request.user, status=1)
         print(snippet_list)
         data = SnippetListSerializer(snippet_list, context={'request': request}, many=True).data
         return Response({
@@ -36,19 +38,28 @@ class SnippetListView(APIView):
 class SnippetDetailView(APIView):
     def get(self, request, id):
         try:
-            snippet = Snippet.objects.get(id=id, user=request.user)
+            snippet = Snippet.objects.get(id=id, user=request.user, status=1)
             return Response(SnippetSerializer(snippet).data)
         except ObjectDoesNotExist:
             return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, id):
         try:
-            snippet = Snippet.objects.get(id=id, user=request.user)
+            snippet = Snippet.objects.get(id=id, user=request.user, status=1)
             snippet_data = make_data(request)
             serializer = SnippetSerializer(snippet, data=snippet_data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, id):
+        try:
+            snippet = Snippet.objects.get(id=id, user=request.user, status=1)
+            snippet.status = 0
+            snippet.save()
+            return HttpResponseRedirect(reverse('snippets'))
         except ObjectDoesNotExist:
             return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
 
