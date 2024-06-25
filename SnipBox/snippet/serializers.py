@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from snippet.models import Snippet
+from snippet.models import Snippet, Tag
 
 
 class SnippetSerializer(serializers.ModelSerializer):
@@ -20,3 +20,9 @@ class SnippetListSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         request = self.context.get('request')
         return request.build_absolute_uri(reverse('snippet-detail', args=[obj.id]))
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"

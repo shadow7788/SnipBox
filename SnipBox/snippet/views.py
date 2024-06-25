@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from snippet.models import Tag, Snippet
-from snippet.serializers import SnippetSerializer, SnippetListSerializer
+from snippet.serializers import SnippetSerializer, SnippetListSerializer, TagSerializer
 
 
 # Create your views here.
@@ -62,6 +62,13 @@ class SnippetDetailView(APIView):
             return HttpResponseRedirect(reverse('snippets'))
         except ObjectDoesNotExist:
             return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TagView(APIView):
+
+    def get(self, request):
+        tag_list = Tag.objects.all()
+        return Response(TagSerializer(tag_list, many=True).data)
 
 
 def make_data(request):
