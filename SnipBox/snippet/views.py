@@ -41,6 +41,17 @@ class SnippetDetailView(APIView):
         except ObjectDoesNotExist:
             return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
 
+    def put(self, request, id):
+        try:
+            snippet = Snippet.objects.get(id=id, user=request.user)
+            snippet_data = make_data(request)
+            serializer = SnippetSerializer(snippet, data=snippet_data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response({"message": "Snippet Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 def make_data(request):
     tags_data = request.data.pop("tags", [])
